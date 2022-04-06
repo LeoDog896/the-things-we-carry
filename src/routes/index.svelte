@@ -65,9 +65,11 @@
         });
 
         Events.on(engine, 'collisionEnd', function(event) {
-            if (event.pairs[0].bodyA != character && event.pairs[0].bodyB != character) return
+            event.pairs.forEach(pair => {
+                if (allNotEquals(pair, character)) return
 
-            score--
+                score--
+            })
         });
 
         Body.setInertia(character, Infinity);

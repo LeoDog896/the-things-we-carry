@@ -15,6 +15,9 @@ const config = {
 		adapter: adapter(),
 		paths: {
 			base: "/the-things-we-carry"
+		},
+		prerender: {
+			default: true
 		}
 	}
 };

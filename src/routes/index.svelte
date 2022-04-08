@@ -4,12 +4,30 @@
     import { onMount } from "svelte";
     import randomcolor from "randomcolor"
 
-    let character;
-    let engine;
-    let ground;
+    const keysPressed: { left: boolean, right: boolean, defense: boolean } = { left: false, right: false, defense: false }
+
+    let character: Body;
+    let engine: Engine;
+    let ground: Body;
     let width = 800
     let height = 600
     let canvas: HTMLCanvasElement;
+
+    const nonDefenseVertices = [[
+        // bottom
+        {x: 0, y: 160}, {x: 80, y: 160}, 
+        {x: 100, y: 50}, {x: 60, y: 80},
+        {x: 20, y: 80}, {x: -20, y: 50},
+        {x: 0, y: 160}
+    ]]
+
+    const defenseVertices = [[
+        // bottom
+        {x: 0, y: 160}, {x: 80, y: 160}, 
+        {x: 100, y: 50}, {x: 60, y: 80},
+        {x: 20, y: 80}, {x: -20, y: 50},
+        {x: 0, y: 160}
+    ]]
 
     function newGround() {
         if (ground) World.remove(engine.world, ground)
@@ -70,8 +88,17 @@
             })
         });
 
-        Events.on(engine, 'collisionEnd', function(event) {
-            
+        Events.on(engine, 'beforeUpdate', function(event) {
+
+            if (!keysPressed.defense)
+
+            if (keysPressed.defense) {
+
+            } else if (keysPressed.left) {
+                Body.setVelocity(character, { x: -5, y: 0 })
+            } else if (keysPressed.right) {
+                Body.setVelocity(character, { x: 5, y: 0 })
+            }
         });
 
         Body.setInertia(character, Infinity);
@@ -121,13 +148,23 @@
         })();
     })
 
-    function input(event: KeyboardEvent) {
+    function startPress(event: KeyboardEvent) {
         if (event.key == "ArrowRight") {
-            Body.setVelocity(character, { x: 6, y: 0 });
+            keysPressed.right = true
         } 
         
         if (event.key == "ArrowLeft") {
-            Body.setVelocity(character, { x: -6, y: 0 })
+            keysPressed.left = true
+        }
+    }
+
+    function endPress(event: KeyboardEvent) {
+        if (event.key == "ArrowRight") {
+            keysPressed.right = false
+        }
+
+        if (event.key == "ArrowLeft") {
+            keysPressed.left = false
         }
     }
 </script>
@@ -136,6 +173,5 @@
 <svelte:window on:resize={() => {
     width = window.innerWidth;
     height = window.innerHeight;
-    ground.width = width;
     newGround()
-}} on:keydown={input}></svelte:window>
+}} on:keydown={startPress} on:keyup={endPress}></svelte:window>

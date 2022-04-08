@@ -22,7 +22,7 @@
         {x: 100, y: 50}, {x: 60, y: 80},
         {x: 20, y: 80}, {x: -20, y: 50},
         {x: 0, y: 160}
-    ]
+    ].map(it => ({ x: it.x * 2, y: it.y * 2 }))
 
     const defenseVertices = [
         // bottom
@@ -116,7 +116,7 @@
 
             const randomX = randomNumber(60, width - 60)
 
-            const randomRectangle = Bodies.rectangle(randomX, 60, randomNumber(8, 16), randomNumber(8, 16))
+            const randomRectangle = Bodies.rectangle(randomX, 60, randomNumber(16, 32), randomNumber(16, 32))
 
             Composite.add(engine.world, randomRectangle)
         }, 100)
@@ -151,7 +151,7 @@
                     } else if (body == character) {
                         context.fillStyle = randomcolor({ seed: part.id, hue: "monochrome" })
                     } else {
-                        context.fillStyle = randomcolor({ seed: body.id })
+                        context.fillStyle = randomcolor({ seed: body.id, luminosity: "dark" })
                     }
                     context.fill();
                 }
@@ -164,11 +164,11 @@
             keysPressed.defense = true
         }
 
-        if (event.key == "ArrowRight") {
+        if (event.key == "ArrowRight" || event.key == "d") {
             keysPressed.right = true
         } 
         
-        if (event.key == "ArrowLeft") {
+        if (event.key == "ArrowLeft" || event.key == "a") {
             keysPressed.left = true
         }
     }
@@ -178,11 +178,11 @@
             keysPressed.defense = false
         }
 
-        if (event.key == "ArrowRight") {
+        if (event.key == "ArrowRight" || event.key == "d") {
             keysPressed.right = false
         }
 
-        if (event.key == "ArrowLeft") {
+        if (event.key == "ArrowLeft" || event.key == "a") {
             keysPressed.left = false
         }
     }

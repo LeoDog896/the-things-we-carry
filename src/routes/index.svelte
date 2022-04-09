@@ -1,11 +1,13 @@
 <script lang="ts">
     import decomp from 'poly-decomp';
-    import { Engine, Runner, Bodies, Composite, Common, Body, Events, World } from "matter-js"
+    import { Engine, Runner, Bodies, Composite, Common, Body, Events, World, type IPair } from "matter-js"
     import { onMount } from "svelte";
     import randomcolor from "randomcolor"
     import { keysPressed } from "$lib/movement"
     import Movement from "$lib/Movement.svelte"
-    
+    import randomColor from 'randomcolor';
+    import { hexToRgb } from '$lib/color';
+
     let character: Body;
     let engine: Engine;
     let ground: Body;
@@ -34,10 +36,14 @@
         wallLeft = Bodies.rectangle(0, 60, 60, height * 4, { isStatic: true });
         wallRight = Bodies.rectangle(width, 60, 60, height * 4, { isStatic: true, });
 
+        [ground, wallLeft, wallRight].forEach(it => it.render.fillStyle = "#444")
+
         Composite.add(engine.world, [ground, wallLeft, wallRight])
     }
 
     const randomNumber = (min: number, max: number) => Math.random() * (max - min + 1) + min;
+
+    let touchedGreen: Body[] = []
 
     onMount(() => {
         
@@ -52,16 +58,21 @@
         // create two boxes and a ground
         character = Bodies.fromVertices(400, height - 60, [nonDefenseVertices]);
 
+        character.parts.forEach(it => it.render.fillStyle = randomColor({ hue: "monochrome", luminosity: "dark" }))
+        character.parts[0].render.opacity = 0
+
         // create runner
         const runner = Runner.create();
 
-        type BodyPair<T> = { bodyA: T, bodyB: T }
-
-        const anyEquals = (pair: BodyPair<unknown>, body: unknown) => pair.bodyA == body || pair.bodyB == body
-        const allNotEquals = (pair: BodyPair<unknown>, body: unknown) => pair.bodyA != body && pair.bodyB != body
-        function findNotEquals<T>(pair: BodyPair<T>, body: T): T {
-            if (pair.bodyA != body) return pair.bodyA
-            if (pair.bodyB != body) return pair.bodyB
+        // anyEquals -- checks if the selected IPair contains a body (or a part of a body)
+        const anyEquals = (pair: IPair, body: Body) => body.parts.includes(pair.bodyA) || body.parts.includes(pair.bodyB) || pair.bodyA === body || pair.bodyB === body;
+        const allNotEquals = (pair: IPair, body: Body) => !body.parts.includes(pair.bodyA) && !body.parts.includes(pair.bodyB) && pair.bodyA !== body && pair.bodyB !== body;
+        
+        const findNotEquals = (pair: IPair, body: Body) => {
+            if (pair.bodyA == body || body.parts.includes(pair.bodyA)) 
+                return pair.bodyB
+            else 
+                return pair.bodyA
         }
 
         // run the engine
@@ -72,18 +83,36 @@
         // add all of the bodies to the world
         Composite.add(engine.world, [character]);
 
+        Events.on(engine, 'collisionStart', event => {
+            for (const pair of event.pairs) {
+                if (allNotEquals(pair, ground) && anyEquals(pair, character)) {
+                    const color = hexToRgb(findNotEquals(pair, character).render.fillStyle)
+
+                    if (color.g <= color.r || color.g <= color.b) {
+                        findNotEquals(pair, character).render.fillStyle = randomcolor({ hue: "green" })
+                        touchedGreen = [...touchedGreen, findNotEquals(pair, character)]
+                    }
+                }
+            }
+        })
+
         Events.on(engine, 'collisionActive', event => {
             event.pairs.forEach(pair => {
+                if (anyEquals(pair, ground) && allNotEquals(pair, character)) {
 
-                if (anyEquals(pair, ground) && allNotEquals(pair, character) && findNotEquals(pair, ground).velocity.x < 0.1) {
-                    // Body.setVelocity(findNotEquals(pair, ground), { x: randomNumber(-5, 5), y: randomNumber(-5, -40) })
-                    World.remove(engine.world, findNotEquals(pair, ground))
+                    const color = hexToRgb(findNotEquals(pair, ground).render.fillStyle)
+
+                    if (color.g > color.r || color.g > color.b) {
+                        Body.setVelocity(findNotEquals(pair, ground), { x: randomNumber(-5, 5), y: randomNumber(-7, -15) })
+                    } else {
+                        World.remove(engine.world, findNotEquals(pair, ground))
+                    }
                 }
 
             })
         });
 
-        Events.on(engine, 'beforeUpdate', function(event) {
+        Events.on(engine, 'beforeUpdate', () => {
             if ($keysPressed.jump && character.position.y > height - (60 + 40)) {
                 Body.setVelocity(character, { x: character.velocity.x, y: -10 })
             } else if ($keysPressed.left) {
@@ -97,10 +126,11 @@
 
         setInterval(() => {
             if (!document.hasFocus()) return
-            const body = Bodies.circle(randomNumber(60, width - 60), randomNumber(60, height - 60), randomNumber(8, 16))
+            const body = Bodies.circle(randomNumber(60, width - 60), 0, randomNumber(8, 16))
             Body.setMass(body, 0.05)
+            body.render.fillStyle = randomColor({ hue: "monochrome", luminosity: "light" })
             World.add(engine.world, body)
-        }, 100)
+        }, 200)
         
         const context = canvas.getContext("2d");
 
@@ -129,14 +159,11 @@
                     context.closePath();
 
                     context.lineWidth = 0
+                    context.strokeStyle = "rgba(1, 1, 1, 0)";
 
-                    if (body == ground || body == ceiling || body == wallLeft || body == wallRight) {
-                        context.fillStyle = "#444"
-                    } else if (body == character) {
-                        context.fillStyle = randomcolor({ seed: part.id, hue: "monochrome" })
-                    } else {
-                        context.fillStyle = randomcolor({ seed: body.id, luminosity: "light", hue: "monochrome" })
-                    }
+                    context.globalAlpha = part.render.opacity;
+                    context.fillStyle = part.render.fillStyle;
+
                     context.fill();
                 }
             }
@@ -151,3 +178,5 @@
     height = window.innerHeight;
     newGround()
 }}></svelte:window>
+
+<p class="fixed mx-16 my-8 top-0 left-0 text-white text-3xl">{touchedGreen.length}</p>

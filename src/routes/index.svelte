@@ -1,8 +1,13 @@
 <script lang="ts">
-  import { Composite, Common, Engine, Bodies, World, Body, Runner } from "matter-js";
+  import { Composite, Common, Engine, Bodies, World, Body, Runner, Events } from "matter-js";
   import { onMount } from "svelte";
   import decomp from 'poly-decomp';
+  import { getContext } from 'svelte';
+  import Shop from '$lib/Shop.svelte';
   import randomColor from 'randomcolor'
+
+  const { open } = getContext('simple-modal');
+  const showShop = () => open(Shop, {}, { transitionWindowProps: { duration: 50 }});
 
   let canvas;
   let engine: Engine;
@@ -12,8 +17,7 @@
     if (ground)
       World.remove(engine.world, ground)
 
-
-      ground = Bodies.rectangle(0, height, width * 4, 20, { isStatic: true });
+      ground = Bodies.rectangle(width / 2, height, width, 20, { isStatic: true });
 
       ground.render.fillStyle = "#444"
 
@@ -30,11 +34,21 @@
 
     Common.setDecomp(decomp)
 
+    Events.on(engine, 'beforeUpdate', () => {
+      const bodies = Composite.allBodies(engine.world);
+
+      for (const body of bodies) {
+        if (!body.isStatic && body.position.y > height) {
+          World.remove(engine.world, body)
+          amount--;
+        }
+      }
+    });
+
     // create runner
     const runner = Runner.create();
 
     runner.isFixed = true
-    runner.delta = 5
 
     Runner.run(runner, engine);
 
@@ -88,6 +102,7 @@
     amount++;
     const body = Bodies.circle(randomNumber(60, width - 60), 0, randomNumber(8, 16))
     Body.setMass(body, 0.05)
+    body.restitution = 1
     body.render.fillStyle = randomColor({ hue: "monochrome", luminosity: "light" })
     World.add(engine.world, body)
   }
@@ -101,6 +116,7 @@
   newGround();
 }}></svelte:window>
 <canvas {width} {height} class="z--10" bind:this={canvas}></canvas>
-<div class="m-16 text-center z-10 top-0 left-0 h-screen fixed">
-  <p>{amount} block{amount == 1 ? "" : "s"}</p>
+<div class="my-8 mx-auto text-center z-10 top-0 left-0 w-screen fixed flex flex-col items-center font-display">
+  <p class="font-thin text-3xl border-b-[1px] pb-2 border-gray-200">{amount} block{amount == 1 ? "" : "s"}</p>
+  <button on:click={showShop} class="w-min mt-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 active:bg-gray-400 rounded-lg">Shop</button>
 </div>

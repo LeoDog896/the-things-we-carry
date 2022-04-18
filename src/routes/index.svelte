@@ -116,7 +116,7 @@
   newGround();
 }}></svelte:window>
 <canvas {width} {height} class="z--10" bind:this={canvas}></canvas>
-<div class="my-8 mx-auto text-center z-10 top-0 left-0 w-screen fixed flex flex-col items-center font-display">
+<div class="my-8 mx-auto text-center top-0 left-0 w-screen fixed flex flex-col items-center font-display">
   <p class="font-thin text-3xl border-b-[1px] pb-2 border-gray-200">{amount} block{amount == 1 ? "" : "s"}</p>
   <button on:click={showShop} class="w-min mt-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 active:bg-gray-400 rounded-lg">Shop</button>
 </div>

@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { clickAmount } from "./settings"
+  import { clickAmount, friction } from "./settings"
   import ShopButton from "./ShopButton.svelte"
+  import SteppedShopButton from "./SteppedShopButton.svelte";
   import { derived } from "svelte/store"
 </script>
 <div class="font-display">
@@ -9,11 +10,15 @@
   <div class="block">
     <ShopButton 
       on:successfullPurchase={() => $clickAmount = $clickAmount + 1}
-      cost={derived(clickAmount, amount => amount * 50)}
+      cost={derived(clickAmount, amount => amount * 30)}
       currentNumber={clickAmount}
-      nextNumber={derived(clickAmount, amount => amount + 1)}
-    >
-      Increase amount 
-    </ShopButton>
+    >Increase amount </ShopButton>
+    <SteppedShopButton
+      on:successfullPurchase={() => $friction = $friction + 0.1}
+      cost={derived(friction, amount => amount * 200)}
+      currentNumber={friction}
+      max={1}
+      nextStep={0.1}
+    >Increase friction </SteppedShopButton>
   </div>
 </div>

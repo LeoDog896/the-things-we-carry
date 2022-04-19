@@ -6,7 +6,8 @@
 
   export let cost: Readable<number>
   export let currentNumber: Writable<number>
-  export let nextNumber: Readable<number> = derived(currentNumber, number => number + 1)
+  export let nextNumber = derived(currentNumber, number => number + 1)
+  export let max: number = Number.MAX_SAFE_INTEGER
 
   const dispatch = createEventDispatcher();
 
@@ -18,8 +19,13 @@
 </script>
 
 <Button 
-  disabled={$cost > $units} 
+  disabled={$cost > $units || max <= $currentNumber}
   on:click={click}
 >
-  <slot/> ({$currentNumber} -> {$nextNumber} - {$cost} unit{$cost == 1 ? "" : "s"}])
+  <slot/> 
+  {#if max <= $currentNumber}
+    <span> (Maxed Out!)</span>
+  {:else}
+    <span> ({$currentNumber} -> {Math.round($nextNumber * 100) / 100} - {Math.round($cost * 100) / 100} unit{$cost == 1 ? "" : "s"}])</span>
+  {/if}
 </Button>

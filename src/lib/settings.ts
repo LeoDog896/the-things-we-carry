@@ -16,6 +16,7 @@ export const removeUnits = (amount: number) => {
   for (let i = 0; i < amount; i++) {
     // grab the body
     const body = get(unitArray)[i]
+    if (body == null) continue
     World.remove(get(engine).world, body)
      
     const index = get(unitArray).indexOf(body);

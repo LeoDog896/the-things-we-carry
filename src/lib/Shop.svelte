@@ -5,7 +5,7 @@
   import { derived } from "svelte/store"
 </script>
 <div class="font-display">
-  <h1 class="text-2xl">Shop</h1>
+  <h1 class="text-2xl mb-8">Shop</h1>
 
   <div class="block">
     <ShopButton 

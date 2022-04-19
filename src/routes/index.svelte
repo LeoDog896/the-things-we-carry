@@ -65,7 +65,7 @@
         constraint: {
           stiffness: 0.2,
           render: {
-            visible: false
+            visible: true
           }
         } as any
       });
@@ -117,7 +117,7 @@
 
   function click() {
     for (let i = 0; i < $clickAmount; i++) {
-      const weight = randomNumber(8, 16);
+      const weight = randomNumber(16, 32);
       const body = Bodies.circle(randomNumber(60, width - 60), 0, weight)
       Body.setMass(body, weight)
       body.restitution = 1

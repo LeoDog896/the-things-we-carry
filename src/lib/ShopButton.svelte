@@ -9,6 +9,8 @@
   export let nextNumber = derived(currentNumber, number => number + 1)
   export let max: number = Number.MAX_SAFE_INTEGER
 
+  $: disabled = $cost > $units || max <= $currentNumber
+
   const dispatch = createEventDispatcher();
 
   function click() {
@@ -19,13 +21,15 @@
 </script>
 
 <Button 
-  disabled={$cost > $units || max <= $currentNumber}
+  {disabled}
   on:click={click}
+  extraClasses={disabled ? "cursor-not-allowed text-gray-700" : ""}
 >
   <slot/> 
+  <br>
   {#if max <= $currentNumber}
-    <span> (Maxed Out!)</span>
+    <span class="text-xs {disabled ? "text-gray-500" : "text-gray-700"}"> (Maxed Out!)</span>
   {:else}
-    <span> ({$currentNumber} -> {Math.round($nextNumber * 100) / 100} - {Math.round($cost * 100) / 100} unit{$cost == 1 ? "" : "s"}])</span>
+    <span class="text-xs {disabled ? "text-red-700" : "text-green-700"}"> ({$currentNumber} -> {Math.round($nextNumber * 100) / 100} - {Math.round($cost * 100) / 100} unit{$cost == 1 ? "" : "s"}])</span>
   {/if}
 </Button>

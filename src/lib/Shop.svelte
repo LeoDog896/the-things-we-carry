@@ -1,18 +1,19 @@
 <script lang="ts">
-  import { clickAmount, units } from "./settings"
-  import Button from "./Button.svelte"
-
-  function increaseClickAmount() {
-    $clickAmount++
-  }
+  import { clickAmount } from "./settings"
+  import ShopButton from "./ShopButton.svelte"
+  import { derived } from "svelte/store"
 </script>
 <div class="font-display">
   <h1 class="text-2xl">Shop</h1>
 
   <div class="block">
-    <Button>Increase Friction</Button>
-    <Button on:click={increaseClickAmount} disabled={$clickAmount * 100 > $units}>
-      Increase amount ({$clickAmount} -> {$clickAmount + 1} - {$clickAmount * 100} units)
-    </Button>
+    <ShopButton 
+      on:successfullPurchase={() => $clickAmount = $clickAmount + 1}
+      cost={derived(clickAmount, amount => amount * 20)}
+      currentNumber={clickAmount}
+      nextNumber={derived(clickAmount, amount => amount + 1)}
+    >
+      Increase amount 
+    </ShopButton>
   </div>
 </div>

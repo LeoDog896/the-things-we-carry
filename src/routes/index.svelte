@@ -6,7 +6,8 @@
   import { getContext } from 'svelte';
   import Shop from '$lib/Shop.svelte';
   import randomColor from 'randomcolor'
-  import { clickAmount, friction, units } from '$lib/settings'
+  import { clickAmount, friction, units, unitArray } from '$lib/settings'
+  import { engine } from "$lib/engine";
   import Button from '$lib/Button.svelte'
 
   const { open } = getContext('simple-modal');
@@ -16,18 +17,17 @@
   });
 
   let canvas;
-  let engine: Engine;
   let ground: Body
 
   function newGround() {
     if (ground)
-      World.remove(engine.world, ground)
+      World.remove($engine.world, ground)
 
       ground = Bodies.rectangle(width / 2, height, width, 20, { isStatic: true });
 
       ground.render.fillStyle = "#444"
 
-      Composite.add(engine.world, [ground])
+      Composite.add($engine.world, [ground])
   }
 
   onMount(() => {
@@ -35,18 +35,16 @@
     width = document.documentElement.clientWidth;
     height = document.documentElement.clientHeight;
 
-    // create an engine
-    engine = Engine.create();
-
     Common.setDecomp(decomp)
 
-    Events.on(engine, 'beforeUpdate', () => {
-      const bodies = Composite.allBodies(engine.world);
+    Events.on($engine, 'beforeUpdate', () => {
+      const bodies = Composite.allBodies($engine.world);
 
       for (const body of bodies) {
         if (!body.isStatic && body.position.y > height) {
-          World.remove(engine.world, body);
-          $units--;
+          World.remove($engine.world, body);
+          const index = $unitArray.indexOf(body);
+          $unitArray = [...$unitArray.slice(0, index), ...$unitArray.slice(index + 1)];
         }
       }
     });
@@ -56,13 +54,13 @@
 
     runner.isFixed = true
 
-    Runner.run(runner, engine);
+    Runner.run(runner, $engine);
 
     newGround()
 
     // add mouse control
     const mouse = Mouse.create(canvas),
-      mouseConstraint = MouseConstraint.create(engine, {
+      mouseConstraint = MouseConstraint.create($engine, {
         mouse: mouse,
         constraint: {
           stiffness: 0.2,
@@ -72,12 +70,12 @@
         } as any
       });
 
-    Composite.add(engine.world, mouseConstraint);
+    Composite.add($engine.world, mouseConstraint);
 
     const context = canvas.getContext("2d");
 
     (function render() {
-      const bodies = Composite.allBodies(engine.world);
+      const bodies = Composite.allBodies($engine.world);
 
       window.requestAnimationFrame(render);
 
@@ -119,20 +117,20 @@
 
   function click() {
     for (let i = 0; i < $clickAmount; i++) {
-      $units++;
       const weight = randomNumber(8, 16);
       const body = Bodies.circle(randomNumber(60, width - 60), 0, weight)
       Body.setMass(body, weight)
       body.restitution = 1
       body.friction = $friction
       body.render.fillStyle = randomColor({ hue: "monochrome", luminosity: "light" })
-      World.add(engine.world, body)
+      $unitArray = [...$unitArray, body];
+      World.add($engine.world, body)
     }
   }
 </script>
 <canvas {width} {height} class="fixed top-0 left-0 z--10" bind:this={canvas}></canvas>
 <div class="fixed top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%]">
-  <div class="w-24 h-24 bg-black rounded-full hover:scale-110 hover:cursor-pointer transition-all" on:click={click}></div>
+  <div class="border-[50px] border-transparent w-24 h-24 bg-black rounded-full hover:scale-110 hover:cursor-pointer transition-all" on:click={click}></div>
 </div>
 <svelte:window on:resize={() => {
   width = document.documentElement.clientWidth;

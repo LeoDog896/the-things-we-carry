@@ -1,13 +1,19 @@
 <script lang="ts">
-  import { Composite, Common, Engine, Bodies, World, Body, Runner, Events } from "matter-js";
+  import { Composite, Common, Engine, Bodies, World, Body, Runner, Events, Mouse, MouseConstraint } from "matter-js";
   import { onMount } from "svelte";
+  import { fly } from 'svelte/transition';
   import decomp from 'poly-decomp';
   import { getContext } from 'svelte';
   import Shop from '$lib/Shop.svelte';
   import randomColor from 'randomcolor'
+  import { clickAmount, friction } from '$lib/settings'
+  import Button from '$lib/Button.svelte'
 
   const { open } = getContext('simple-modal');
-  const showShop = () => open(Shop, {}, { transitionWindowProps: { duration: 50 }});
+  const showShop = () => open(Shop, {}, { 
+    transitionWindow: fly,
+    transitionWindowProps: { duration: 50 }
+  });
 
   let canvas;
   let engine: Engine;
@@ -54,6 +60,20 @@
 
     newGround()
 
+    // add mouse control
+    const mouse = Mouse.create(canvas),
+      mouseConstraint = MouseConstraint.create(engine, {
+        mouse: mouse,
+        constraint: {
+          stiffness: 0.2,
+          render: {
+            visible: false
+          }
+        } as any
+      });
+
+    Composite.add(engine.world, mouseConstraint);
+
     const context = canvas.getContext("2d");
 
     (function render() {
@@ -99,16 +119,20 @@
   const randomNumber = (min: number, max: number) => Math.random() * (max - min + 1) + min;
 
   function click() {
-    amount++;
-    const body = Bodies.circle(randomNumber(60, width - 60), 0, randomNumber(8, 16))
-    Body.setMass(body, 0.05)
-    body.restitution = 1
-    body.render.fillStyle = randomColor({ hue: "monochrome", luminosity: "light" })
-    World.add(engine.world, body)
+    for (let i = 0; i < $clickAmount; i++) {
+      amount++;
+      const weight = randomNumber(8, 16);
+      const body = Bodies.circle(randomNumber(60, width - 60), 0, weight)
+      Body.setMass(body, weight)
+      body.restitution = 1
+      body.friction = $friction
+      body.render.fillStyle = randomColor({ hue: "monochrome", luminosity: "light" })
+      World.add(engine.world, body)
+    }
   }
 </script>
 <div class="fixed top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%]">
-  <div class="w-24 h-24 bg-black" on:click={click}></div>
+  <div class="w-24 h-24 bg-black rounded-full hover:scale-110 hover:cursor-pointer transition-all" on:click={click}></div>
 </div>
 <svelte:window on:resize={() => {
   width = window.innerWidth;
@@ -117,6 +141,6 @@
 }}></svelte:window>
 <canvas {width} {height} class="z--10" bind:this={canvas}></canvas>
 <div class="my-8 mx-auto text-center top-0 left-0 w-screen fixed flex flex-col items-center font-display">
-  <p class="font-thin text-3xl border-b-[1px] pb-2 border-gray-200">{amount} block{amount == 1 ? "" : "s"}</p>
-  <button on:click={showShop} class="w-min mt-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 active:bg-gray-400 rounded-lg">Shop</button>
+  <p class="font-thin text-3xl border-b-[1px] pb-2 border-gray-200">{amount} unit{amount == 1 ? "" : "s"}</p>
+  <Button on:click={showShop} extraClasses="mt-4 w-min">Shop</Button>
 </div>

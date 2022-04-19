@@ -6,7 +6,7 @@
   import { getContext } from 'svelte';
   import Shop from '$lib/Shop.svelte';
   import randomColor from 'randomcolor'
-  import { clickAmount, friction } from '$lib/settings'
+  import { clickAmount, friction, units } from '$lib/settings'
   import Button from '$lib/Button.svelte'
 
   const { open } = getContext('simple-modal');
@@ -32,8 +32,8 @@
 
   onMount(() => {
 
-    width = window.innerWidth;
-    height = window.innerHeight;
+    width = document.documentElement.clientWidth;
+    height = document.documentElement.clientHeight;
 
     // create an engine
     engine = Engine.create();
@@ -45,8 +45,8 @@
 
       for (const body of bodies) {
         if (!body.isStatic && body.position.y > height) {
-          World.remove(engine.world, body)
-          amount--;
+          World.remove(engine.world, body);
+          $units--;
         }
       }
     });
@@ -112,7 +112,6 @@
 
   })
 
-  let amount = 0;
   let width = 600;
   let height = 600;
 
@@ -120,7 +119,7 @@
 
   function click() {
     for (let i = 0; i < $clickAmount; i++) {
-      amount++;
+      $units++;
       const weight = randomNumber(8, 16);
       const body = Bodies.circle(randomNumber(60, width - 60), 0, weight)
       Body.setMass(body, weight)
@@ -131,16 +130,16 @@
     }
   }
 </script>
+<canvas {width} {height} class="fixed top-0 left-0 z--10" bind:this={canvas}></canvas>
 <div class="fixed top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%]">
   <div class="w-24 h-24 bg-black rounded-full hover:scale-110 hover:cursor-pointer transition-all" on:click={click}></div>
 </div>
 <svelte:window on:resize={() => {
-  width = window.innerWidth;
-  height = window.innerHeight;
+  width = document.documentElement.clientWidth;
+  height = document.documentElement.clientHeight;
   newGround();
 }}></svelte:window>
-<canvas {width} {height} class="z--10" bind:this={canvas}></canvas>
 <div class="my-8 mx-auto text-center top-0 left-0 w-screen fixed flex flex-col items-center font-display">
-  <p class="font-thin text-3xl border-b-[1px] pb-2 border-gray-200">{amount} unit{amount == 1 ? "" : "s"}</p>
+  <p class="font-thin text-3xl border-b-[1px] pb-2 border-gray-200">{$units} unit{$units == 1 ? "" : "s"}</p>
   <Button on:click={showShop} extraClasses="mt-4 w-min">Shop</Button>
 </div>

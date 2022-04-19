@@ -9,7 +9,7 @@
   <div class="block">
     <ShopButton 
       on:successfullPurchase={() => $clickAmount = $clickAmount + 1}
-      cost={derived(clickAmount, amount => amount * 20)}
+      cost={derived(clickAmount, amount => amount * 50)}
       currentNumber={clickAmount}
       nextNumber={derived(clickAmount, amount => amount + 1)}
     >

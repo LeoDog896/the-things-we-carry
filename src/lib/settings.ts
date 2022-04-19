@@ -8,7 +8,6 @@ export const unitArray: Writable<Body[]> = writable([])
 export const units = derived(unitArray, array => array.length)
 
 export const removeUnits = (amount: number) => {
-  alert(amount)
   for (let i = 0; i < amount; i++) {
     const body = get(unitArray)[i]
     World.remove(get(engine).world, body)

@@ -22,7 +22,7 @@
     >Increase friction </SteppedShopButton>
     <SteppedShopButton 
       on:successfullPurchase={() => $restitution = $restitution - 0.1 }
-      cost={derived(restitution, amount => (1.1 - amount) * 300)}
+      cost={derived(restitution, amount => (1.1 - amount) * 250)}
       currentNumber={restitution}
       negative={true}
       max={0}

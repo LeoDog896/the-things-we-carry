@@ -126,7 +126,7 @@
 </script>
 <canvas {width} {height} class="fixed top-0 left-0 z--10" bind:this={canvas}></canvas>
 <div class="fixed top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%]">
-  <div class="border-[50px] border-transparent w-36 h-36 opacity-20 bg-black rounded-full hover:scale-110 hover:cursor-pointer transition-all" on:click={click}></div>
+  <div class="border-[50px] border-transparent w-24 h-24 bg-black rounded-full hover:scale-110 hover:cursor-pointer transition-all" on:click={click}></div>
 </div>
 <svelte:window on:resize={() => {
   width = document.documentElement.clientWidth;

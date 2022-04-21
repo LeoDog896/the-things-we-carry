@@ -7,10 +7,10 @@
   export let cost: Readable<number>
   export let currentNumber: Writable<number>
   export let nextNumber = derived(currentNumber, number => number + 1)
-  export let max: number = Number.MAX_SAFE_INTEGER
   export let negative: boolean = false
+  export let max: number = negative ? 0 : Number.MAX_SAFE_INTEGER
 
-  $: disabled = $cost > $units || max <= $currentNumber
+  $: disabled = $cost > $units || (negative ? max > $currentNumber : max <= $currentNumber)
 
   const dispatch = createEventDispatcher();
 

@@ -8,14 +8,12 @@ export const clickAmount = writable(1);
 export const ground = writable<Body>();
 export const unitArray: Readable<Body[]> = new class {
   constructor() {
-    setInterval(() => {
-      Events.on(get(engine), "beforeUpdate", () => {
-        const unfilteredBodies = Composite.allBodies(get(engine).world)
-        const bodies = unfilteredBodies.filter(it => it !== get(ground));
-        this.bodies = bodies;
-        this.subscriptions.forEach(it => it(bodies));
-      })
-    }, 1000)
+    Events.on(get(engine), "beforeUpdate", () => {
+      const unfilteredBodies = Composite.allBodies(get(engine).world)
+      const bodies = unfilteredBodies.filter(it => it !== get(ground));
+      this.bodies = bodies;
+      this.subscriptions.forEach(it => it(bodies));
+    })
   }
 
   bodies: Body[] = []

@@ -11,7 +11,7 @@
 </script>
 
 <ShopButton
-  on:successfullPurchase 
+  on:successfullPurchase
   {cost} {currentNumber} {max} {negative}
   nextNumber={derived(currentNumber, number => number + nextStep)}
 >

@@ -1,10 +1,36 @@
-import { writable, derived, get } from "svelte/store";
-import { type Body, World } from "matter-js"
+import { writable, derived, get, type Readable, type Subscriber } from "svelte/store";
+import { type Body, World, Events, Composite } from "matter-js"
 import { engine } from "./engine";
 
 export const friction = writable(0.1);
+export const restitution = writable(1);
 export const clickAmount = writable(1);
-export const unitArray = writable<Body[]>([])
+export const ground = writable<Body>();
+export const unitArray: Readable<Body[]> = new class {
+  constructor() {
+    setInterval(() => {
+      Events.on(get(engine), "beforeUpdate", () => {
+        const unfilteredBodies = Composite.allBodies(get(engine).world)
+        const bodies = unfilteredBodies.filter(it => it !== get(ground));
+        this.bodies = bodies;
+        this.subscriptions.forEach(it => it(bodies));
+      })
+    }, 1000)
+  }
+
+  bodies: Body[] = []
+  subscriptions: Subscriber<Body[]>[] = []
+  subscribe(run: Subscriber<Body[]>) {
+    this.subscriptions = [...this.subscriptions, run]
+    run(this.bodies)
+    return () => {
+      this.subscriptions = this.subscriptions.filter(it => it != run)
+    }
+  }
+}
+// export const unitArray = readable(() => 
+//   window ? Composite.allBodies(get(engine).world).filter(it => it !== get(ground)) : []
+// )
 export const units = derived(unitArray, array => array.length)
 
 /**
@@ -18,11 +44,5 @@ export const removeUnits = (amount: number) => {
     const body = get(unitArray)[i]
     if (body == null) continue
     World.remove(get(engine).world, body)
-     
-    const index = get(unitArray).indexOf(body);
-    
-    if (index == -1) continue; // no body found -- ignore it.
-
-    unitArray.set([...get(unitArray).slice(0, index), ...get(unitArray).slice(index + 1)]);
   }
 }

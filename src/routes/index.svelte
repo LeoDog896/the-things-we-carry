@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { Composite, Common, Engine, Bodies, World, Body, Runner, Events, Mouse, MouseConstraint } from "matter-js";
+  import { Composite, Common, Bodies, World, Body, Runner, Events, Mouse, MouseConstraint } from "matter-js";
   import { onMount } from "svelte";
   import { fly } from 'svelte/transition';
   import decomp from 'poly-decomp';
   import { getContext } from 'svelte';
   import Shop from '$lib/Shop.svelte';
   import randomColor from 'randomcolor'
-  import { clickAmount, friction, units, unitArray } from '$lib/settings'
+  import { clickAmount, friction, units, ground } from '$lib/settings'
   import { engine } from "$lib/engine";
   import Button from '$lib/Button.svelte'
 
@@ -16,18 +16,17 @@
     transitionWindowProps: { duration: 50 }
   });
 
-  let canvas;
-  let ground: Body
+  let canvas: HTMLCanvasElement;
 
   function newGround() {
-    if (ground)
-      World.remove($engine.world, ground)
+    if ($ground)
+      World.remove($engine.world, $ground)
 
-      ground = Bodies.rectangle(width / 2, height, width, 20, { isStatic: true });
+      $ground = Bodies.rectangle(width / 2, height, width, 20, { isStatic: true });
 
-      ground.render.fillStyle = "#444"
+      $ground.render.fillStyle = "#444"
 
-      Composite.add($engine.world, [ground])
+      Composite.add($engine.world, [$ground])
   }
 
   onMount(() => {
@@ -41,10 +40,8 @@
       const bodies = Composite.allBodies($engine.world);
 
       for (const body of bodies) {
-        if (!body.isStatic && body.position.y > height) {
+        if (!body.isStatic && (body.position.y > height || body.position.x < -100 || body.position.x > width + 100 || body.position.y < -100)) {
           World.remove($engine.world, body);
-          const index = $unitArray.indexOf(body);
-          $unitArray = [...$unitArray.slice(0, index), ...$unitArray.slice(index + 1)];
         }
       }
     });
@@ -123,7 +120,6 @@
       body.restitution = 1
       body.friction = $friction
       body.render.fillStyle = randomColor({ hue: "monochrome", luminosity: "light" })
-      $unitArray = [...$unitArray, body];
       World.add($engine.world, body)
     }
   }

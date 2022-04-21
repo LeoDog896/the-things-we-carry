@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { clickAmount, friction } from "./settings"
+  import { clickAmount, friction, restitution } from "./settings"
   import ShopButton from "./ShopButton.svelte"
   import SteppedShopButton from "./SteppedShopButton.svelte";
   import { derived } from "svelte/store"
@@ -20,5 +20,13 @@
       max={1}
       nextStep={0.1}
     >Increase friction </SteppedShopButton>
+    <SteppedShopButton 
+      on:successfulPurchase={() => $restitution = $restitution - 0.1}
+      cost={derived(restitution, amount => (1.1 - amount) * 300)}
+      currentNumber={restitution}
+      negative={true}
+      max={0}
+      nextStep={-0.1}
+    >Decrease Bounciness</SteppedShopButton>
   </div>
 </div>

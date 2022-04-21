@@ -7,11 +7,12 @@
   export let currentNumber: Writable<number>
   export let nextStep: number
   export let max: number
+  export let negative: boolean = false
 </script>
 
 <ShopButton
   on:successfullPurchase 
-  {cost} {currentNumber} {max}
+  {cost} {currentNumber} {max} {negative}
   nextNumber={derived(currentNumber, number => number + nextStep)}
 >
   <slot></slot>

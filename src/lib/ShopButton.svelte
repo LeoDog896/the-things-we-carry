@@ -8,6 +8,7 @@
   export let currentNumber: Writable<number>
   export let nextNumber = derived(currentNumber, number => number + 1)
   export let max: number = Number.MAX_SAFE_INTEGER
+  export let negative: boolean = false
 
   $: disabled = $cost > $units || max <= $currentNumber
 
@@ -27,7 +28,7 @@
 >
   <slot/> 
   <br>
-  {#if max <= $currentNumber}
+  {#if negative ? max > $currentNumber : max <= $currentNumber}
     <span class="text-xs {disabled ? "text-gray-500" : "text-gray-700"}"> (Maxed Out!)</span>
   {:else}
     <span class="text-xs {disabled ? "text-red-700" : "text-green-700"}"> ({$currentNumber} -> {Math.round($nextNumber * 100) / 100} - {Math.round($cost * 100) / 100} unit{$cost == 1 ? "" : "s"}])</span>

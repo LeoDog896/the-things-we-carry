@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Composite, Common, Bodies, World, Body, Runner, Events, Mouse, MouseConstraint } from "matter-js";
+  import matter from "matter-js";
+  const { Composite, Common, Bodies, World, Body, Runner, Events, Mouse, MouseConstraint } = matter
   import { onMount } from "svelte";
   import { fly } from 'svelte/transition';
   import decomp from 'poly-decomp';

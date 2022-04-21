@@ -1,5 +1,6 @@
 import { writable, derived, get, type Readable, type Subscriber } from "svelte/store";
-import { type Body, World, Events, Composite } from "matter-js"
+import matter, { type Body } from "matter-js"
+const { World, Events, Composite } = matter;
 import { engine } from "./engine";
 
 export const friction = writable(0.1);

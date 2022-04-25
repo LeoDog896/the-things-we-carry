@@ -5,10 +5,8 @@
   import { derived } from "svelte/store"
   import { fly } from 'svelte/transition';
 </script>
-<div transition:fly={{ x: -50 }} class="font-display fixed top-0 left-0 h-[calc(100vh)] w-auto p-8 bg-gray-400/[0.6]">
-  <h1 class="text-2xl mb-8 text-center">Shop <button class="ml-2 rounded-full py-2 px-4 bg-white hover:bg-red-400 transition-all text-black" on:click={() => {
-    $shopEnabled = false
-  }}>x</button></h1>
+<div transition:fly={{ x: -200 }} class="font-display fixed top-0 left-0 h-[calc(100vh)] w-auto p-8 bg-gray-400/[0.6]">
+  <h1 class="text-2xl mb-8 text-center">Shop</h1>
 
   <div class="flex flex-col">
     <ShopButton 

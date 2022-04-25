@@ -2,20 +2,12 @@
   import matter from "matter-js";
   const { Composite, Common, Bodies, World, Body, Runner, Events, Mouse, MouseConstraint } = matter
   import { onMount } from "svelte";
-  import { fly } from 'svelte/transition';
   import decomp from 'poly-decomp';
-  import { getContext } from 'svelte';
-  import Shop from '$lib/Shop.svelte';
   import randomColor from 'randomcolor'
-  import { clickAmount, friction, units, ground } from '$lib/settings'
+  import Shop from "$lib/Shop.svelte"
+  import { clickAmount, friction, units, ground, shopEnabled } from '$lib/settings'
   import { engine } from "$lib/engine";
   import Button from '$lib/Button.svelte'
-
-  const { open } = getContext('simple-modal');
-  const showShop = () => open(Shop, {}, { 
-    transitionWindow: fly,
-    transitionWindowProps: { duration: 50 }
-  });
 
   let canvas: HTMLCanvasElement;
 
@@ -127,7 +119,7 @@
 </script>
 <canvas {width} {height} class="fixed top-0 left-0 z--10" bind:this={canvas}></canvas>
 <div class="fixed top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%]">
-  <div class="border-[50px] border-transparent w-24 h-24 bg-black rounded-full hover:scale-110 hover:cursor-pointer transition-all" on:click={click}></div>
+  <div class="border-[50px] border-transparent w-24 h-24 active:scale-90 bg-black rounded-full hover:scale-110 hover:cursor-pointer transition-all" on:click={click}></div>
 </div>
 <svelte:window on:resize={() => {
   width = document.documentElement.clientWidth;
@@ -136,5 +128,8 @@
 }}></svelte:window>
 <div class="my-8 mx-auto text-center top-0 left-0 w-screen fixed flex flex-col items-center font-display">
   <p class="font-thin text-3xl border-b-[1px] pb-2 border-gray-200">{$units} unit{$units == 1 ? "" : "s"}</p>
-  <Button on:click={showShop} extraClasses="mt-4 w-min">Shop</Button>
+  <Button on:click={() => $shopEnabled = !$shopEnabled} extraClasses="mt-4 w-min">Shop</Button>
 </div>
+{#if $shopEnabled}
+  <Shop></Shop>
+{/if}

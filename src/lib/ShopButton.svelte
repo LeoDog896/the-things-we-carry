@@ -24,7 +24,7 @@
 <Button 
   {disabled}
   on:click={click}
-  extraClasses={disabled ? "cursor-not-allowed text-gray-700" : ""}
+  extraClasses={(disabled ? "m-4 cursor-not-allowed text-gray-700" : "m-4 transition-all active:scale-90")}
 >
   <slot/> 
   <br>

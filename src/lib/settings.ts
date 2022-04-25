@@ -7,6 +7,8 @@ export const friction = writable(0.1);
 export const restitution = writable(1);
 export const clickAmount = writable(1);
 export const ground = writable<Body>();
+export const shopEnabled = writable(false);
+
 export const unitArray: Readable<Body[]> = new class {
   constructor() {
     Events.on(get(engine), "beforeUpdate", () => {
